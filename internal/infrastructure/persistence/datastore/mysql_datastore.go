@@ -22,7 +22,7 @@ func NewMysqlDataStore(config types.EngineDB) *MySqlDataStore {
 	return &MySqlDataStore{WriterDB: nil, ReaderDB: nil, config: config}
 }
 
-func (r *MySqlDataStore) Start() error {
+func (r *MySqlDataStore) Connect() error {
 	writerDB, err := createConnection(r.config.Writer)
 	if err != nil {
 		return err

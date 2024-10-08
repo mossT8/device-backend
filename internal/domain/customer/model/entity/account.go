@@ -1,6 +1,9 @@
 package entity
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -10,6 +13,80 @@ type accountRecordId int64
 type accountText string
 type accountBool bool
 type accountDate time.Time
+
+func (a *accountText) Scan(value interface{}) error {
+	if value == nil {
+		*a = ""
+		return nil
+	}
+	val, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	*a = accountText(string(val))
+	return nil
+}
+
+func (a accountText) Value() (driver.Value, error) {
+	return string(a), nil
+}
+
+func (a *accountBool) Scan(value interface{}) error {
+	if value == nil {
+		*a = false
+		return nil
+	}
+
+	switch v := value.(type) {
+	case bool:
+		*a = accountBool(v)
+	case int64:
+		*a = accountBool(v != 0)
+	case string:
+		if v == "true" {
+			*a = accountBool(true)
+		} else {
+			*a = accountBool(false)
+		}
+	default:
+		return errors.New("type assertion to bool failed")
+	}
+	return nil
+}
+
+func (a accountBool) Value() (driver.Value, error) {
+	return bool(a), nil
+}
+
+func (a *accountDate) Scan(value interface{}) error {
+	if value == nil {
+		*a = accountDate(time.Time{})
+		return nil
+	}
+	val, ok := value.(time.Time)
+	if !ok {
+		return errors.New("type assertion to time.Time failed")
+	}
+	*a = accountDate(val)
+	return nil
+}
+
+func (a accountDate) Value() (driver.Value, error) {
+	return time.Time(a), nil
+}
+
+func (a accountDate) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(a))
+}
+
+func (a *accountDate) UnmarshalJSON(data []byte) error {
+	var t time.Time
+	if err := json.Unmarshal(data, &t); err != nil {
+		return err
+	}
+	*a = accountDate(t)
+	return nil
+}
 
 type Account struct {
 	ID accountRecordId

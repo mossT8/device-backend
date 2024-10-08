@@ -14,16 +14,16 @@ import (
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/dto/response"
 )
 
-type AccountController struct {
+type CustomerController struct {
 	customerDomain customer.CustomerDomain
 }
 
-func NewAccountController(conn *datastore.MySqlDataStore, server *iris.Application, custDomain customer.CustomerDomain) AccountController {
-	ac := AccountController{
+func NewCustomerController(conn *datastore.MySqlDataStore, server *iris.Application, custDomain customer.CustomerDomain) CustomerController {
+	ac := CustomerController{
 		customerDomain: custDomain,
 	}
 
-	server.Post(constants.ApiPrefix+"/account}", ac.HandlePostAccount)
+	server.Post(constants.ApiPrefix+"/account", ac.HandlePostAccount)
 	server.Put(constants.ApiPrefix+"/account/{accountID:int64}/update", ac.HandlePutAccount)
 	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/fetch", ac.HandleGetAccount)
 	server.Get(constants.ApiPrefix+"/account/list", ac.HandleGetAccounts)
@@ -41,7 +41,7 @@ func NewAccountController(conn *datastore.MySqlDataStore, server *iris.Applicati
 	return ac
 }
 
-func (ac *AccountController) HandlePostAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePostAccount(ctx iris.Context) {
 	var req request.Account
 	requestId := GetRequestID(ctx)
 
@@ -69,7 +69,7 @@ func (ac *AccountController) HandlePostAccount(ctx iris.Context) {
 	}, http.StatusCreated, requestId)
 }
 
-func (ac *AccountController) HandlePutAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePutAccount(ctx iris.Context) {
 	var req request.Account
 	requestId := GetRequestID(ctx)
 
@@ -113,7 +113,7 @@ func (ac *AccountController) HandlePutAccount(ctx iris.Context) {
 	}, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandleGetAccount(ctx iris.Context) {
+func (ac *CustomerController) HandleGetAccount(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	accountID, err := ctx.Params().GetInt64("accountID")
 	if err != nil {
@@ -131,10 +131,12 @@ func (ac *AccountController) HandleGetAccount(ctx iris.Context) {
 		Email:           account.GetEmail(),
 		Name:            account.GetName(),
 		ReceivesUpdates: account.GetReceivesUpdates(),
+		CreatedAt:       account.GetCreatedAt(),
+		ModifiedAt:      account.GetModifiedAt(),
 	}, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandleGetAccounts(ctx iris.Context) {
+func (ac *CustomerController) HandleGetAccounts(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	page, pageSize, err := GetPageAndPageSize(ctx)
 	if err != nil {
@@ -160,7 +162,7 @@ func (ac *AccountController) HandleGetAccounts(ctx iris.Context) {
 	RespondWithList(ctx.ResponseWriter(), accounts, *page, *pageSize, *total, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandlePostAddressForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePostAddressForAccount(ctx iris.Context) {
 	var req request.Address
 	requestId := GetRequestID(ctx)
 
@@ -206,7 +208,7 @@ func (ac *AccountController) HandlePostAddressForAccount(ctx iris.Context) {
 	}, http.StatusCreated, requestId)
 }
 
-func (ac *AccountController) HandlePutAddressForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePutAddressForAccount(ctx iris.Context) {
 	var req request.Address
 	requestId := GetRequestID(ctx)
 
@@ -263,7 +265,7 @@ func (ac *AccountController) HandlePutAddressForAccount(ctx iris.Context) {
 	}, http.StatusCreated, requestId)
 }
 
-func (ac *AccountController) HandleGetAddressForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandleGetAddressForAccount(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	accountID, err := ctx.Params().GetInt64("accountID")
 	if err != nil {
@@ -300,7 +302,7 @@ func (ac *AccountController) HandleGetAddressForAccount(ctx iris.Context) {
 	}, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandleGetAddressesForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandleGetAddressesForAccount(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	accountID, err := ctx.Params().GetInt64("accountID")
 	if err != nil {
@@ -342,7 +344,7 @@ func (ac *AccountController) HandleGetAddressesForAccount(ctx iris.Context) {
 	RespondWithList(ctx.ResponseWriter(), addressList, *page, *pageSize, *total, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandlePostUserForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePostUserForAccount(ctx iris.Context) {
 	var req request.User
 	requestId := GetRequestID(ctx)
 
@@ -385,7 +387,7 @@ func (ac *AccountController) HandlePostUserForAccount(ctx iris.Context) {
 	}, http.StatusCreated, requestId)
 }
 
-func (ac *AccountController) HandlePutUserForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandlePutUserForAccount(ctx iris.Context) {
 	var req request.User
 	requestId := GetRequestID(ctx)
 
@@ -439,7 +441,7 @@ func (ac *AccountController) HandlePutUserForAccount(ctx iris.Context) {
 	}, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandleGetUserForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandleGetUserForAccount(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	accountID, err := ctx.Params().GetInt64("accountID")
 	if err != nil {
@@ -475,7 +477,7 @@ func (ac *AccountController) HandleGetUserForAccount(ctx iris.Context) {
 	}, http.StatusOK, requestId)
 }
 
-func (ac *AccountController) HandleGetUsersForAccount(ctx iris.Context) {
+func (ac *CustomerController) HandleGetUsersForAccount(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
 	accountID, err := ctx.Params().GetInt64("accountID")
 	if err != nil {

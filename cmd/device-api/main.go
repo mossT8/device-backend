@@ -86,17 +86,20 @@ func setup() error {
 	}
 
 	sqlStoreConn = datastore.NewMysqlDataStore(config.Database)
+	cErr := sqlStoreConn.Connect()
+	if cErr != nil {
+		return fmt.Errorf("unable to connect to db: %s, exiting", cErr.Error())
+	}
 
 	customerDomain = customer.NewCustomerDomain(sqlStoreConn)
 
 	irisServer = iris.New()
 	axxessLogs = middleware.MakeAccessLog()
+	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
 	irisServer.Party(httpConstants.ApiPrefix).Use(
 		axxessLogs.Handler,
 		middleware.CaselessMatcherMiddleware,
 		middleware.RequestIDMiddleware)
-
-	http.NewAccountController(sqlStoreConn, irisServer, customerDomain)
 
 	port = env.Getenv(envConstants.Port, envConstants.DefaultPort)
 

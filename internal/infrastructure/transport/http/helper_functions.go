@@ -135,7 +135,8 @@ func RespondWithError(w http.ResponseWriter, requestId string, errReason error) 
 
 	w.Header().Set(constants.ContentType, constants.ApplicationJson)
 	w.WriteHeader(cmp.Or(domain.ErrToHTTPStatus[errReason], http.StatusBadRequest))
-	logger.Infof(requestId, "RESP OUT : '%s'", string(response))
+	logger.Infof(requestId, "unable to perform request due to: %s", errReason.Error())
+	logger.Infof(requestId, "out going response : '%s'", string(response))
 
 	if _, err := w.Write(response); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, constants.ErrFormatLogging, err)
