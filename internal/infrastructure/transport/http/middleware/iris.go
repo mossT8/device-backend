@@ -4,17 +4,17 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/accesslog"
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/constants"
 )
 
-func CaselessMatcherMiddleware(ctx *context.Context) {
+func CaselessMatcherMiddleware(ctx iris.Context) {
 	ctx.Request().URL.Path = strings.ToLower(ctx.Path())
 	ctx.Next()
 }
 
-func RequestIDMiddleware(ctx *context.Context) {
+func RequestIDMiddleware(ctx iris.Context) {
 	requestId := ctx.Request().Header.Get(constants.CTXRequestIdKey)
 	if len(requestId) == 0 {
 		requestId = uuid.NewString()

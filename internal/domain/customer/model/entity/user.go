@@ -4,35 +4,30 @@ import (
 	"time"
 )
 
-type userRecordId int64
-type userText string
-type userBool bool
-type userDate time.Time
-
 type User struct {
-	ID userRecordId
+	ID mysqlRecordId
 
-	AccountId       accountRecordId
-	Email           userText
-	Cell            userText
-	FirstName       *userText
-	LastName        *userText
-	Verified        userBool
-	ReceivesUpdates userBool
+	AccountId       mysqlRecordId
+	Email           mysqlText
+	Cell            mysqlText
+	FirstName       mysqlText
+	LastName        mysqlText
+	Verified        mysqlBool
+	ReceivesUpdates mysqlBool
 
-	CreatedAt  userDate
-	ModifiedAt userDate
+	CreatedAt  mysqlDate
+	ModifiedAt mysqlDate
 }
 
 func NewUser(accountId int64, email string, timestamp time.Time) User {
 
 	return User{
-		AccountId:       accountRecordId(accountId),
-		Email:           userText(email),
-		Verified:        userBool(false),
-		ReceivesUpdates: userBool(false),
-		CreatedAt:       userDate(timestamp),
-		ModifiedAt:      userDate(timestamp),
+		AccountId:       mysqlRecordId(accountId),
+		Email:           mysqlText(email),
+		Verified:        mysqlBool(false),
+		ReceivesUpdates: mysqlBool(false),
+		CreatedAt:       mysqlDate(timestamp),
+		ModifiedAt:      mysqlDate(timestamp),
 	}
 }
 
@@ -54,17 +49,11 @@ func (u *User) GetCell() string {
 }
 
 func (u *User) GetFirstName() string {
-	if u.FirstName != nil {
-		return string(*u.FirstName)
-	}
-	return ""
+	return string(u.FirstName)
 }
 
 func (u *User) GetLastName() string {
-	if u.LastName != nil {
-		return string(*u.LastName)
-	}
-	return ""
+	return string(u.LastName)
 }
 
 func (u *User) GetVerified() bool {
@@ -85,50 +74,48 @@ func (u *User) GetModifiedAt() time.Time {
 
 // Setters
 func (u *User) SetID(id int64) {
-	u.ID = userRecordId(id)
+	u.ID = mysqlRecordId(id)
 }
 
 func (u *User) SetAccountId(accountId int64) {
-	u.AccountId = accountRecordId(accountId)
-	u.ModifiedAt = userDate(time.Now())
+	u.AccountId = mysqlRecordId(accountId)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetEmail(email string) {
-	u.Email = userText(email)
-	u.ModifiedAt = userDate(time.Now())
+	u.Email = mysqlText(email)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetCell(cell string) {
-	u.Cell = userText(cell)
-	u.ModifiedAt = userDate(time.Now())
+	u.Cell = mysqlText(cell)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetFirstName(firstName string) {
-	ft := userText(firstName)
-	u.FirstName = &ft
-	u.ModifiedAt = userDate(time.Now())
+	u.FirstName = mysqlText(firstName)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetLastName(lastName string) {
-	lt := userText(lastName)
-	u.LastName = &lt
-	u.ModifiedAt = userDate(time.Now())
+	u.LastName = mysqlText(lastName)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetVerified(verified bool) {
-	u.Verified = userBool(verified)
-	u.ModifiedAt = userDate(time.Now())
+	u.Verified = mysqlBool(verified)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetReceivesUpdates(receivesUpdates bool) {
-	u.ReceivesUpdates = userBool(receivesUpdates)
-	u.ModifiedAt = userDate(time.Now())
+	u.ReceivesUpdates = mysqlBool(receivesUpdates)
+	u.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (u *User) SetCreatedAt(createdAt time.Time) {
-	u.CreatedAt = userDate(createdAt)
+	u.CreatedAt = mysqlDate(createdAt)
 }
 
 func (u *User) SetModifiedAt(modifiedAt time.Time) {
-	u.ModifiedAt = userDate(modifiedAt)
+	u.ModifiedAt = mysqlDate(modifiedAt)
 }

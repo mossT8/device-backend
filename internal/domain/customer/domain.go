@@ -102,6 +102,7 @@ func (u *CustomerDomainImpl) AddAddressForAccount(requestId string, account enti
 func (u *CustomerDomainImpl) FetchAddressForAccount(requestId string, account entity.Account, addressId int64) (*entity.Address, error) {
 	address := &entity.Address{}
 	address.SetID(addressId)
+	address.SetAccountId(account.GetID())
 	if aErr := address.GetAddressByID(*u.dbConn); aErr != nil {
 		logger.Errorf(requestId, "unable to get address by ID %d", addressId)
 		return nil, aErr
@@ -120,6 +121,7 @@ func (u *CustomerDomainImpl) UpdateAddressForAccount(requestId string, account e
 func (u *CustomerDomainImpl) DeleteAddressForAccount(requestId string, account entity.Account, addressId int64) error {
 	address := &entity.Address{}
 	address.SetID(addressId)
+	address.SetAccountId(account.GetID())
 	if aErr := address.DeleteAddress(*u.dbConn); aErr != nil {
 		logger.Errorf(requestId, "unable to delete address by ID %d", addressId)
 		return aErr
@@ -158,6 +160,7 @@ func (u *CustomerDomainImpl) AddUserForAccount(requestId string, account entity.
 func (u *CustomerDomainImpl) FetchUserForAccount(requestId string, account entity.Account, userId int64) (*entity.User, error) {
 	user := &entity.User{}
 	user.SetID(userId)
+	user.SetAccountId(account.GetID())
 	if uErr := user.GetUserByID(*u.dbConn); uErr != nil {
 		logger.Errorf(requestId, "unable to get user by ID %d", userId)
 		return nil, uErr
@@ -176,6 +179,7 @@ func (u *CustomerDomainImpl) UpdateUserForAccount(requestId string, account enti
 func (u *CustomerDomainImpl) DeleteUserForAccount(requestId string, account entity.Account, userId int64) error {
 	user := &entity.User{}
 	user.SetID(userId)
+	user.SetAccountId(account.GetID())
 	if uErr := user.DeleteUser(*u.dbConn); uErr != nil {
 		logger.Errorf(requestId, "unable to delete user by ID %d", userId)
 		return uErr

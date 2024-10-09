@@ -3,9 +3,10 @@ package response
 import "time"
 
 type Account struct {
-	Email           string
-	Name            string
-	ReceivesUpdates bool
-	CreatedAt       time.Time
-	ModifiedAt      time.Time
+	ID              int64     `json:"id"`
+	Email           string    `json:"email"`
+	Name            string    `json:"name"`
+	ReceivesUpdates bool      `json:"receivesUpdates"`
+	CreatedAt       time.Time `json:"createdAt"`
+	ModifiedAt      time.Time `json:"modifiedAt"`
 }

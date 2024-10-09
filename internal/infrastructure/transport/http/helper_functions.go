@@ -20,7 +20,13 @@ import (
 var validate = validator.New()
 
 func RespondWithJSON(w http.ResponseWriter, payload interface{}, code int, requestId string) {
-	response, err := json.Marshal(payload)
+	wappedPayload := httpType.DefaultData{
+		RequestID: requestId,
+		Status:    domain.SuccessCode,
+		Message:   domain.SuccessMessage,
+		Data:      payload,
+	}
+	response, err := json.Marshal(wappedPayload)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -29,7 +35,7 @@ func RespondWithJSON(w http.ResponseWriter, payload interface{}, code int, reque
 	w.Header().Set(constants.ContentType, constants.ApplicationJson)
 	w.WriteHeader(code)
 
-	logger.Infof(requestId, constants.ErrFormatLogging, string(response))
+	logger.Infof(requestId, constants.RspFormatLogging, string(response))
 
 	if _, err := w.Write(response); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, constants.ErrFormatLogging, err)
@@ -38,10 +44,13 @@ func RespondWithJSON(w http.ResponseWriter, payload interface{}, code int, reque
 
 func RespondWithList(w http.ResponseWriter, list interface{}, page, pageSIze, total int64, code int, requestId string) {
 	wrappedList := httpType.DefaultList{
-		Page:     page,
-		PageSize: pageSIze,
-		Total:    total,
-		Data:     list,
+		RequestID: requestId,
+		Status:    domain.SuccessCode,
+		Message:   domain.SuccessMessage,
+		Page:      page,
+		PageSize:  pageSIze,
+		Total:     total,
+		Data:      list,
 	}
 	response, err := json.Marshal(wrappedList)
 	if err != nil {
@@ -52,7 +61,7 @@ func RespondWithList(w http.ResponseWriter, list interface{}, page, pageSIze, to
 	w.Header().Set(constants.ContentType, constants.ApplicationJson)
 	w.WriteHeader(code)
 
-	logger.Infof(requestId, constants.ErrFormatLogging, string(response))
+	logger.Infof(requestId, constants.RspFormatLogging, string(response))
 
 	if _, err := w.Write(response); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, constants.ErrFormatLogging, err)
@@ -71,7 +80,7 @@ func GetPageAndPageSize(ctx iris.Context) (*int64, *int64, error) {
 		return nil, nil, domain.ErrBadPageSize
 	}
 
-	pageIndex, iErr := ctx.URLParamInt64(constants.URLPageIndexKey)
+	pageIndex, iErr := ctx.URLParamInt64(constants.URLPageKey)
 	if iErr != nil && iErr.Error() == "not found" {
 		pageIndex = constants.DefaultIndex
 	} else if pageIndex < 0 {
@@ -82,7 +91,11 @@ func GetPageAndPageSize(ctx iris.Context) (*int64, *int64, error) {
 }
 
 func RespondWithMappingError(w http.ResponseWriter, reason, requestId string) {
-	response, err := json.Marshal(&httpType.ErrorResponse{Error: fmt.Sprintf("Bad Request: %s", reason)})
+	response, err := json.Marshal(&httpType.DefaultErrorResponse{
+		Error:     fmt.Sprintf("Bad Request: %s", reason),
+		RequestId: requestId,
+		Code:      domain.BadPayload,
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

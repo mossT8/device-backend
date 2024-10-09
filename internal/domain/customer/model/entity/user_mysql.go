@@ -18,9 +18,18 @@ func (u *User) AddUser(conn datastore.MySqlDataStore) error {
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
-		INSERT INTO users (account_ID, email, cell, first_name, last_name, receive_updates, verified, created_at, modified_at)
-    	VALUE (?, ?, ?, ?, ? , ?, ?, ?);
-	`)
+			INSERT INTO users (
+		account_id,
+		email,
+		cell,
+		first_name,
+		last_name,
+		verified,
+		receive_updates,
+		created_at,
+		modified_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+`)
 	if err != nil {
 		return err
 	}
@@ -35,8 +44,8 @@ func (u *User) AddUser(conn datastore.MySqlDataStore) error {
 		u.Cell,
 		u.FirstName,
 		u.LastName,
-		u.ReceivesUpdates,
 		u.Verified,
+		u.ReceivesUpdates,
 		u.CreatedAt,
 		u.ModifiedAt,
 	)
@@ -93,12 +102,11 @@ func (u *User) GetUserByID(conn datastore.MySqlDataStore) error {
 	defer cancel()
 
 	if qErr := conn.ReaderDB.QueryRowContext(ctx, `
-		SELECT u.email, u.account_ID, u.cell, u.first_name, u.last_name, u.receive_updates, u.verified, u.created_at, u.modified_at
+		SELECT u.email, u.cell, u.first_name, u.last_name, u.receive_updates, u.verified, u.created_at, u.modified_at
 		FROM users u
-		WHERE u.ID = ? AND u.active = 1;
-	`, u.Email).Scan(
+		WHERE u.account_ID = ? AND u.ID = ? AND u.active = 1;
+	`, u.AccountId, u.ID).Scan(
 		&u.Email,
-		&u.AccountId,
 		&u.Cell,
 		&u.FirstName,
 		&u.LastName,
@@ -108,7 +116,7 @@ func (u *User) GetUserByID(conn datastore.MySqlDataStore) error {
 		&u.ModifiedAt,
 	); qErr != nil {
 		if errors.Is(qErr, sql.ErrNoRows) {
-			return domain.ErrNotFoundUserByEmail
+			return domain.ErrNotFoundUserByID
 		}
 		return qErr
 	}

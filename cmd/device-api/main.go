@@ -95,11 +95,11 @@ func setup() error {
 
 	irisServer = iris.New()
 	axxessLogs = middleware.MakeAccessLog()
-	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
-	irisServer.Party(httpConstants.ApiPrefix).Use(
+	irisServer.Use(
 		axxessLogs.Handler,
 		middleware.CaselessMatcherMiddleware,
 		middleware.RequestIDMiddleware)
+	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
 
 	port = env.Getenv(envConstants.Port, envConstants.DefaultPort)
 

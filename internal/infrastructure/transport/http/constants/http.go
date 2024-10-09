@@ -11,5 +11,6 @@ const (
 const (
 	ContentType      = "Content-Type"
 	ApplicationJson  = "application/json"
-	ErrFormatLogging = "Received error %s\n"
+	ErrFormatLogging = "returned error: %s"
+	RspFormatLogging = "response out: %s"
 )

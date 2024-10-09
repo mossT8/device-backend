@@ -29,13 +29,13 @@ func NewCustomerController(conn *datastore.MySqlDataStore, server *iris.Applicat
 	server.Get(constants.ApiPrefix+"/account/list", ac.HandleGetAccounts)
 
 	server.Post(constants.ApiPrefix+"/account/{accountID:int64}/address", ac.HandlePostAddressForAccount)
-	server.Put(constants.ApiPrefix+"/account/{accountID:int64}/adress/{addressID:int64}/update", ac.HandlePutAddressForAccount)
+	server.Put(constants.ApiPrefix+"/account/{accountID:int64}/address/{addressID:int64}/update", ac.HandlePutAddressForAccount)
 	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/address/{addressID:int64}/fetch", ac.HandleGetAddressForAccount)
 	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/address/list", ac.HandleGetAddressesForAccount)
 
 	server.Post(constants.ApiPrefix+"/account/{accountID:int64}/user", ac.HandlePostUserForAccount)
-	server.Put(constants.ApiPrefix+"/account/{accountID:int64}/user/{userId:int64}/update", ac.HandlePutUserForAccount)
-	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/user/{userId:int64}/fetch", ac.HandleGetUserForAccount)
+	server.Put(constants.ApiPrefix+"/account/{accountID:int64}/user/{userID:int64}/update", ac.HandlePutUserForAccount)
+	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/user/{userID:int64}/fetch", ac.HandleGetUserForAccount)
 	server.Get(constants.ApiPrefix+"/account/{accountID:int64}/user/list", ac.HandleGetUsersForAccount)
 
 	return ac
@@ -63,9 +63,12 @@ func (ac *CustomerController) HandlePostAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Account{
+		ID:              account.GetID(),
 		Email:           account.GetEmail(),
 		Name:            account.GetName(),
 		ReceivesUpdates: account.GetReceivesUpdates(),
+		CreatedAt:       account.GetCreatedAt(),
+		ModifiedAt:      account.GetModifiedAt(),
 	}, http.StatusCreated, requestId)
 }
 
@@ -91,15 +94,7 @@ func (ac *CustomerController) HandlePutAccount(ctx iris.Context) {
 	}
 
 	account.SetName(req.Name)
-	account.SetEmail(req.Email)
 	account.SetReceivesUpdates(req.ReceivesUpdates)
-
-	if req.Password != "" {
-		if pErr := account.SetPassword(req.Password, uuid.New().String()); pErr != nil {
-			RespondWithMappingError(ctx.ResponseWriter(), pErr.Error(), requestId)
-			return
-		}
-	}
 
 	if err := ac.customerDomain.UpdateAccount(requestId, account); err != nil {
 		RespondWithError(ctx.ResponseWriter(), requestId, err)
@@ -107,9 +102,12 @@ func (ac *CustomerController) HandlePutAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Account{
+		ID:              account.GetID(),
 		Email:           account.GetEmail(),
 		Name:            account.GetName(),
 		ReceivesUpdates: account.GetReceivesUpdates(),
+		CreatedAt:       account.GetCreatedAt(),
+		ModifiedAt:      account.GetModifiedAt(),
 	}, http.StatusOK, requestId)
 }
 
@@ -128,6 +126,7 @@ func (ac *CustomerController) HandleGetAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Account{
+		ID:              account.GetID(),
 		Email:           account.GetEmail(),
 		Name:            account.GetName(),
 		ReceivesUpdates: account.GetReceivesUpdates(),
@@ -138,7 +137,7 @@ func (ac *CustomerController) HandleGetAccount(ctx iris.Context) {
 
 func (ac *CustomerController) HandleGetAccounts(ctx iris.Context) {
 	requestId := GetRequestID(ctx)
-	page, pageSize, err := GetPageAndPageSize(ctx)
+	pageSize, page, err := GetPageAndPageSize(ctx)
 	if err != nil {
 		RespondWithError(ctx.ResponseWriter(), requestId, err)
 		return
@@ -153,9 +152,12 @@ func (ac *CustomerController) HandleGetAccounts(ctx iris.Context) {
 	accounts := make([]response.Account, 0)
 	for _, account := range paginatedList {
 		accounts = append(accounts, response.Account{
+			ID:              account.GetID(),
 			Email:           account.GetEmail(),
 			Name:            account.GetName(),
 			ReceivesUpdates: account.GetReceivesUpdates(),
+			CreatedAt:       account.GetCreatedAt(),
+			ModifiedAt:      account.GetModifiedAt(),
 		})
 	}
 
@@ -198,6 +200,7 @@ func (ac *CustomerController) HandlePostAddressForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Address{
+		ID:           address.GetID(),
 		Name:         address.GetName(),
 		AddressLine1: address.GetAddressLine1(),
 		AddressLine2: address.GetAddressLine2(),
@@ -205,6 +208,8 @@ func (ac *CustomerController) HandlePostAddressForAccount(ctx iris.Context) {
 		State:        address.GetState(),
 		PostalCode:   address.GetPostalCode(),
 		Country:      address.GetCountry(),
+		CreatedAt:    address.GetCreatedAt(),
+		ModifiedAt:   address.GetModifiedAt(),
 	}, http.StatusCreated, requestId)
 }
 
@@ -255,6 +260,7 @@ func (ac *CustomerController) HandlePutAddressForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Address{
+		ID:           address.GetID(),
 		Name:         address.GetName(),
 		AddressLine1: address.GetAddressLine1(),
 		AddressLine2: address.GetAddressLine2(),
@@ -262,6 +268,8 @@ func (ac *CustomerController) HandlePutAddressForAccount(ctx iris.Context) {
 		State:        address.GetState(),
 		PostalCode:   address.GetPostalCode(),
 		Country:      address.GetCountry(),
+		CreatedAt:    address.GetCreatedAt(),
+		ModifiedAt:   address.GetModifiedAt(),
 	}, http.StatusCreated, requestId)
 }
 
@@ -292,6 +300,7 @@ func (ac *CustomerController) HandleGetAddressForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.Address{
+		ID:           address.GetID(),
 		Name:         address.GetName(),
 		AddressLine1: address.GetAddressLine1(),
 		AddressLine2: address.GetAddressLine2(),
@@ -316,7 +325,7 @@ func (ac *CustomerController) HandleGetAddressesForAccount(ctx iris.Context) {
 		return
 	}
 
-	page, pageSize, err := GetPageAndPageSize(ctx)
+	pageSize, page, err := GetPageAndPageSize(ctx)
 	if err != nil {
 		RespondWithError(ctx.ResponseWriter(), requestId, err)
 		return
@@ -331,6 +340,7 @@ func (ac *CustomerController) HandleGetAddressesForAccount(ctx iris.Context) {
 	addressList := make([]response.Address, 0)
 	for _, address := range addresses {
 		addressList = append(addressList, response.Address{
+			ID:           address.GetID(),
 			Name:         address.GetName(),
 			AddressLine1: address.GetAddressLine1(),
 			AddressLine2: address.GetAddressLine2(),
@@ -338,6 +348,8 @@ func (ac *CustomerController) HandleGetAddressesForAccount(ctx iris.Context) {
 			State:        address.GetState(),
 			PostalCode:   address.GetPostalCode(),
 			Country:      address.GetCountry(),
+			CreatedAt:    address.GetCreatedAt(),
+			ModifiedAt:   address.GetModifiedAt(),
 		})
 	}
 
@@ -378,12 +390,15 @@ func (ac *CustomerController) HandlePostUserForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.User{
+		ID:              user.GetID(),
 		Email:           user.GetEmail(),
 		Cell:            user.GetCell(),
 		FirstName:       user.GetFirstName(),
 		LastName:        user.GetLastName(),
 		Verified:        user.GetVerified(),
 		ReceivesUpdates: user.GetReceivesUpdates(),
+		CreatedAt:       user.GetCreatedAt(),
+		ModifiedAt:      user.GetModifiedAt(),
 	}, http.StatusCreated, requestId)
 }
 
@@ -432,12 +447,15 @@ func (ac *CustomerController) HandlePutUserForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.User{
+		ID:              user.GetID(),
 		Email:           user.GetEmail(),
 		Cell:            user.GetCell(),
 		FirstName:       user.GetFirstName(),
 		LastName:        user.GetLastName(),
 		Verified:        user.GetVerified(),
 		ReceivesUpdates: user.GetReceivesUpdates(),
+		CreatedAt:       user.GetCreatedAt(),
+		ModifiedAt:      user.GetModifiedAt(),
 	}, http.StatusOK, requestId)
 }
 
@@ -468,12 +486,15 @@ func (ac *CustomerController) HandleGetUserForAccount(ctx iris.Context) {
 	}
 
 	RespondWithJSON(ctx.ResponseWriter(), response.User{
+		ID:              user.GetID(),
 		Email:           user.GetEmail(),
 		Cell:            user.GetCell(),
 		FirstName:       user.GetFirstName(),
 		LastName:        user.GetLastName(),
 		Verified:        user.GetVerified(),
 		ReceivesUpdates: user.GetReceivesUpdates(),
+		CreatedAt:       user.GetCreatedAt(),
+		ModifiedAt:      user.GetModifiedAt(),
 	}, http.StatusOK, requestId)
 }
 
@@ -491,7 +512,7 @@ func (ac *CustomerController) HandleGetUsersForAccount(ctx iris.Context) {
 		return
 	}
 
-	page, pageSize, err := GetPageAndPageSize(ctx)
+	pageSize, page, err := GetPageAndPageSize(ctx)
 	if err != nil {
 		RespondWithError(ctx.ResponseWriter(), requestId, err)
 		return
@@ -506,12 +527,15 @@ func (ac *CustomerController) HandleGetUsersForAccount(ctx iris.Context) {
 	userList := make([]response.User, 0)
 	for _, user := range users {
 		userList = append(userList, response.User{
+			ID:              user.GetID(),
 			Email:           user.GetEmail(),
 			Cell:            user.GetCell(),
 			FirstName:       user.GetFirstName(),
 			LastName:        user.GetLastName(),
 			Verified:        user.GetVerified(),
 			ReceivesUpdates: user.GetReceivesUpdates(),
+			CreatedAt:       user.GetCreatedAt(),
+			ModifiedAt:      user.GetModifiedAt(),
 		})
 	}
 

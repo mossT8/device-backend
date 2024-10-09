@@ -67,11 +67,10 @@ func (a *Address) GetAddressByID(conn datastore.MySqlDataStore) error {
 	defer cancel()
 
 	if qErr := conn.ReaderDB.QueryRowContext(ctx, `
-        SELECT a.account_ID, a.name, a.address_line1, a.address_line2, a.city, a.state, a.postal_code, a.country, a.verified, a.created_at, a.modified_at
+        SELECT a.name, a.address_line1, a.address_line2, a.city, a.state, a.postal_code, a.country, a.verified, a.created_at, a.modified_at
         FROM addresses a
-        WHERE a.ID = ? AND a.active = 1;
-    `, a.ID).Scan(
-		&a.AccountId,
+        WHERE a.account_ID = ? AND a.ID = ? AND a.active = 1;
+    `, a.AccountId, a.ID).Scan(
 		&a.Name,
 		&a.AddressLine1,
 		&a.AddressLine2,
@@ -167,7 +166,7 @@ func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
 	stmt, err := tx.PrepareContext(ctx, `
 		UPDATE addresses
 		SET name = ?, address_line1 = ?, address_line2 = ?, city = ?, state = ?, postal_code = ?, country = ?, verified = ?, modified_at = ?
-		WHERE ID = ? AND account_ID = ? AND active = 1;
+		WHERE account_ID = ? AND ID = ?  AND active = 1;
 	`)
 	if err != nil {
 		return err
@@ -187,8 +186,8 @@ func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
 		a.Country,
 		a.Verified,
 		a.ModifiedAt,
-		a.ID,
 		a.AccountId,
+		a.ID,
 	)
 	if err != nil {
 		return err
@@ -215,7 +214,7 @@ func (a *Address) DeleteAddress(conn datastore.MySqlDataStore) error {
 	stmt, err := tx.PrepareContext(ctx, `
 		UPDATE addresses
 		SET active = 0
-		WHERE ID = ? AND account_ID = ? AND active = 1;
+		WHERE account_ID = ? AND ID = ? AND active = 1;
 	`)
 	if err != nil {
 		return err
@@ -225,7 +224,7 @@ func (a *Address) DeleteAddress(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx, a.ID, a.AccountId)
+	_, err = stmt.ExecContext(ctx, a.AccountId, a.ID)
 	if err != nil {
 		return err
 	}

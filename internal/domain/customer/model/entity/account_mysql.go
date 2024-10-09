@@ -136,11 +136,19 @@ func (a *Account) ListAccounts(conn datastore.MySqlDataStore, page, pageSize int
 	defer cancel()
 
 	rows, qErr := conn.ReaderDB.QueryContext(ctx, `
-        SELECT a.ID, a.email, a.password_hash, a.salt, a.name, a.receive_updates, a.verified, a.created_at, a.modified_at
+          SELECT a.ID,
+            a.email,
+            a.password_hash,
+            a.salt,
+            a.name,
+            a.receive_updates,
+            a.verified,
+            a.created_at,
+            a.modified_at
         FROM accounts a
-		WHERE active = 1
-        LIMIT ?
-        OFFSET ?;
+        WHERE active = 1
+        ORDER BY a.ID
+        LIMIT ? OFFSET ?;	
     `, pageSize, page*pageSize)
 	if qErr != nil {
 		return nil, qErr
@@ -166,7 +174,6 @@ func (a *Account) ListAccounts(conn datastore.MySqlDataStore, page, pageSize int
 		); sErr != nil {
 			return nil, sErr
 		}
-
 		accounts = append(accounts, account)
 	}
 
@@ -183,7 +190,7 @@ func (a *Account) UpdateAccount(conn datastore.MySqlDataStore) error {
 
 	stmt, err := tx.PrepareContext(ctx, `
 		UPDATE accounts a
-		SET a.email = ?, a.name = ?, a.receive_updates = ?, a.verified = ?, a.modified_at = ?
+		SET a.name = ?, a.receive_updates = ?, a.modified_at = ?
 		WHERE a.ID = ? AND a.active = 1;
 	`)
 	if err != nil {
@@ -195,10 +202,8 @@ func (a *Account) UpdateAccount(conn datastore.MySqlDataStore) error {
 	}()
 
 	_, err = stmt.ExecContext(ctx,
-		a.Email,
 		a.Name,
 		a.ReceivesUpdates,
-		a.Verified,
 		a.ModifiedAt,
 		a.ID,
 	)

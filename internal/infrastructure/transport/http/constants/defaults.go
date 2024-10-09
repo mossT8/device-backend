@@ -1,8 +1,8 @@
 package constants
 
 const (
-	URLPageSizeKey  = "pageSize"
-	URLPageIndexKey = "pageIndex"
+	URLPageSizeKey = "pageSize"
+	URLPageKey     = "page"
 
 	DefaultPageSize = 10
 	DefaultIndex    = 0

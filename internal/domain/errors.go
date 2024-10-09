@@ -26,6 +26,10 @@ var ErrNotFoundAccountByID = errors.New("no account found with given ID")
 var ErrNotFoundAddressByID = errors.New("no address found with given ID")
 var ErrNotFoundAddressByAccountID = errors.New("no address found with given account ID")
 
+var BadPayload = "ERR_BAD_PAYLOAD_FIELDS"
+var SuccessCode = "00"
+var SuccessMessage = "Request performed successfully"
+
 var (
 	ErrCodeMap = map[error]string{
 		ErrBadPageSize:                "ERR_BAD_PAGE_SIZE",

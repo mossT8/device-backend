@@ -1,35 +1,32 @@
 package entity
 
-import "time"
-
-type addressRecordId int64
-type addressText string
-type addressBool bool
-type addressDate time.Time
+import (
+	"time"
+)
 
 type Address struct {
-	ID addressRecordId
+	ID mysqlRecordId
 
-	AccountId    accountRecordId
-	Name         addressText
-	AddressLine1 addressText
-	AddressLine2 *addressText
-	City         addressText
-	State        *addressText
-	PostalCode   addressText
-	Country      addressText
-	Verified     addressBool
+	AccountId    mysqlRecordId
+	Name         mysqlText
+	AddressLine1 mysqlText
+	AddressLine2 *mysqlText
+	City         mysqlText
+	State        *mysqlText
+	PostalCode   mysqlText
+	Country      mysqlText
+	Verified     mysqlBool
 
-	CreatedAt  addressDate
-	ModifiedAt addressDate
+	CreatedAt  mysqlDate
+	ModifiedAt mysqlDate
 }
 
 func NewAddress(accountId int64, timestamp time.Time) Address {
 
 	return Address{
-		AccountId:  accountRecordId(accountId),
-		CreatedAt:  addressDate(timestamp),
-		ModifiedAt: addressDate(timestamp),
+		AccountId:  mysqlRecordId(accountId),
+		CreatedAt:  mysqlDate(timestamp),
+		ModifiedAt: mysqlDate(timestamp),
 	}
 }
 
@@ -90,60 +87,60 @@ func (a *Address) GetModifiedAt() time.Time {
 
 // Setters
 func (a *Address) SetID(id int64) {
-	a.ID = addressRecordId(id)
+	a.ID = mysqlRecordId(id)
 }
 
 func (a *Address) SetAccountId(accountId int64) {
-	a.AccountId = accountRecordId(accountId)
-	a.ModifiedAt = addressDate(time.Now())
+	a.AccountId = mysqlRecordId(accountId)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetName(name string) {
-	a.Name = addressText(name)
-	a.ModifiedAt = addressDate(time.Now())
+	a.Name = mysqlText(name)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetAddressLine1(addressLine1 string) {
-	a.AddressLine1 = addressText(addressLine1)
-	a.ModifiedAt = addressDate(time.Now())
+	a.AddressLine1 = mysqlText(addressLine1)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetAddressLine2(addressLine2 string) {
-	at := addressText(addressLine2)
+	at := mysqlText(addressLine2)
 	a.AddressLine2 = &at
-	a.ModifiedAt = addressDate(time.Now())
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetCity(city string) {
-	a.City = addressText(city)
-	a.ModifiedAt = addressDate(time.Now())
+	a.City = mysqlText(city)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetState(state string) {
-	st := addressText(state)
+	st := mysqlText(state)
 	a.State = &st
-	a.ModifiedAt = addressDate(time.Now())
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetPostalCode(postalCode string) {
-	a.PostalCode = addressText(postalCode)
-	a.ModifiedAt = addressDate(time.Now())
+	a.PostalCode = mysqlText(postalCode)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetCountry(country string) {
-	a.Country = addressText(country)
-	a.ModifiedAt = addressDate(time.Now())
+	a.Country = mysqlText(country)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetVerified(verified bool) {
-	a.Verified = addressBool(verified)
-	a.ModifiedAt = addressDate(time.Now())
+	a.Verified = mysqlBool(verified)
+	a.ModifiedAt = mysqlDate(time.Now())
 }
 
 func (a *Address) SetCreatedAt(createdAt time.Time) {
-	a.CreatedAt = addressDate(createdAt)
+	a.CreatedAt = mysqlDate(createdAt)
 }
 
 func (a *Address) SetModifiedAt(modifiedAt time.Time) {
-	a.ModifiedAt = addressDate(modifiedAt)
+	a.ModifiedAt = mysqlDate(modifiedAt)
 }
