@@ -8,13 +8,15 @@ import (
 	"mossT8.github.com/device-backend/internal/infrastructure/persistence/datastore"
 )
 
-func (a *Address) AddAddress(conn datastore.MySqlDataStore) error {
+func (a *Address) AddAddress(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -46,8 +48,7 @@ func (a *Address) AddAddress(conn datastore.MySqlDataStore) error {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}
@@ -154,13 +155,15 @@ func (a *Address) ListAddresses(conn datastore.MySqlDataStore, page, pageSize in
 	return addresses, nil
 }
 
-func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
+func (a *Address) UpdateAddress(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -176,7 +179,7 @@ func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx,
+	if _, err = stmt.ExecContext(ctx,
 		a.Name,
 		a.AddressLine1,
 		a.AddressLine2,
@@ -188,13 +191,11 @@ func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
 		a.ModifiedAt,
 		a.AccountId,
 		a.ID,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}
@@ -202,13 +203,15 @@ func (a *Address) UpdateAddress(conn datastore.MySqlDataStore) error {
 	return nil
 }
 
-func (a *Address) DeleteAddress(conn datastore.MySqlDataStore) error {
+func (a *Address) DeleteAddress(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -224,13 +227,11 @@ func (a *Address) DeleteAddress(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx, a.AccountId, a.ID)
-	if err != nil {
+	if _, err = stmt.ExecContext(ctx, a.AccountId, a.ID); err != nil {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}

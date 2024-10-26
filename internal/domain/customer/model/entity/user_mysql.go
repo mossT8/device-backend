@@ -8,28 +8,29 @@ import (
 	"mossT8.github.com/device-backend/internal/infrastructure/persistence/datastore"
 )
 
-func (u *User) AddUser(conn datastore.MySqlDataStore) error {
+func (u *User) AddUser(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
-			INSERT INTO users (
-		account_id,
-		email,
-		cell,
-		first_name,
-		last_name,
-		verified,
-		receive_updates,
-		created_at,
-		modified_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-`)
+		INSERT INTO users (
+			account_id,
+			email,
+			cell,
+			first_name,
+			last_name,
+			verified,
+			receive_updates,
+			created_at,
+			modified_at) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}
@@ -53,8 +54,7 @@ func (u *User) AddUser(conn datastore.MySqlDataStore) error {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}
@@ -63,7 +63,6 @@ func (u *User) AddUser(conn datastore.MySqlDataStore) error {
 	if cErr != nil {
 		return cErr
 	}
-
 	u.SetID(lastId)
 
 	return nil
@@ -184,13 +183,16 @@ func (u *User) ListUsers(conn datastore.MySqlDataStore, page, pageSize int64) ([
 	return users, nil
 }
 
-func (u *User) UpdateUser(conn datastore.MySqlDataStore) error {
+func (u *User) UpdateUser(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		tx, cErr = conn.WriterDB.BeginTx(ctx, nil)
+		if cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -206,7 +208,7 @@ func (u *User) UpdateUser(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx,
+	if _, err = stmt.ExecContext(ctx,
 		u.Email,
 		u.Cell,
 		u.FirstName,
@@ -216,13 +218,11 @@ func (u *User) UpdateUser(conn datastore.MySqlDataStore) error {
 		u.ModifiedAt,
 		u.ID,
 		u.AccountId,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}
@@ -230,13 +230,15 @@ func (u *User) UpdateUser(conn datastore.MySqlDataStore) error {
 	return nil
 }
 
-func (u *User) DeleteUser(conn datastore.MySqlDataStore) error {
+func (u *User) DeleteUser(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -252,13 +254,11 @@ func (u *User) DeleteUser(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx, u.ID, u.AccountId)
-	if err != nil {
+	if _, err = stmt.ExecContext(ctx, u.ID, u.AccountId); err != nil {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}

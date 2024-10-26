@@ -38,7 +38,7 @@ func NewCustomerDomain(conn *datastore.MySqlDataStore) CustomerDomain {
 
 // Account operations
 func (u *CustomerDomainImpl) AddAccount(requestId string, account *entity.Account) error {
-	if aErr := account.AddAccount(*u.dbConn); aErr != nil {
+	if aErr := account.AddAccount(*u.dbConn, nil); aErr != nil {
 		logger.Errorf(requestId, "unable to create account %+v", account)
 		return aErr
 	}
@@ -56,7 +56,7 @@ func (u *CustomerDomainImpl) FetchAccount(requestId string, accountId int64) (*e
 }
 
 func (u *CustomerDomainImpl) UpdateAccount(requestId string, account *entity.Account) error {
-	if aErr := account.UpdateAccount(*u.dbConn); aErr != nil {
+	if aErr := account.UpdateAccount(*u.dbConn, nil); aErr != nil {
 		logger.Errorf(requestId, "unable to update account %+v", account)
 		return aErr
 	}
@@ -92,7 +92,7 @@ func (u *CustomerDomainImpl) ListAccounts(requestId string, page, pageSize int64
 
 // Address operations
 func (u *CustomerDomainImpl) AddAddressForAccount(requestId string, account entity.Account, address *entity.Address) error {
-	if aErr := address.AddAddress(*u.dbConn); aErr != nil {
+	if aErr := address.AddAddress(*u.dbConn, nil); aErr != nil {
 		logger.Errorf(requestId, "unable to create address %+v", address)
 		return aErr
 	}
@@ -111,7 +111,7 @@ func (u *CustomerDomainImpl) FetchAddressForAccount(requestId string, account en
 }
 
 func (u *CustomerDomainImpl) UpdateAddressForAccount(requestId string, account entity.Account, address *entity.Address) error {
-	if aErr := address.UpdateAddress(*u.dbConn); aErr != nil {
+	if aErr := address.UpdateAddress(*u.dbConn, nil); aErr != nil {
 		logger.Errorf(requestId, "unable to update address %+v", address)
 		return aErr
 	}
@@ -122,7 +122,7 @@ func (u *CustomerDomainImpl) DeleteAddressForAccount(requestId string, account e
 	address := &entity.Address{}
 	address.SetID(addressId)
 	address.SetAccountId(account.GetID())
-	if aErr := address.DeleteAddress(*u.dbConn); aErr != nil {
+	if aErr := address.DeleteAddress(*u.dbConn, nil); aErr != nil {
 		logger.Errorf(requestId, "unable to delete address by ID %d", addressId)
 		return aErr
 	}
@@ -150,7 +150,7 @@ func (u *CustomerDomainImpl) ListAddressesForAccount(requestId string, account e
 
 // User operations
 func (u *CustomerDomainImpl) AddUserForAccount(requestId string, account entity.Account, user *entity.User) error {
-	if uErr := user.AddUser(*u.dbConn); uErr != nil {
+	if uErr := user.AddUser(*u.dbConn, nil); uErr != nil {
 		logger.Errorf(requestId, "unable to create user %+v", user)
 		return uErr
 	}
@@ -169,7 +169,7 @@ func (u *CustomerDomainImpl) FetchUserForAccount(requestId string, account entit
 }
 
 func (u *CustomerDomainImpl) UpdateUserForAccount(requestId string, account entity.Account, user *entity.User) error {
-	if uErr := user.UpdateUser(*u.dbConn); uErr != nil {
+	if uErr := user.UpdateUser(*u.dbConn, nil); uErr != nil {
 		logger.Errorf(requestId, "unable to update user %+v", user)
 		return uErr
 	}
@@ -180,7 +180,7 @@ func (u *CustomerDomainImpl) DeleteUserForAccount(requestId string, account enti
 	user := &entity.User{}
 	user.SetID(userId)
 	user.SetAccountId(account.GetID())
-	if uErr := user.DeleteUser(*u.dbConn); uErr != nil {
+	if uErr := user.DeleteUser(*u.dbConn, nil); uErr != nil {
 		logger.Errorf(requestId, "unable to delete user by ID %d", userId)
 		return uErr
 	}

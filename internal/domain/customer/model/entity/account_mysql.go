@@ -8,13 +8,15 @@ import (
 	"mossT8.github.com/device-backend/internal/infrastructure/persistence/datastore"
 )
 
-func (a *Account) AddAccount(conn datastore.MySqlDataStore) error {
+func (a *Account) AddAccount(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -43,8 +45,7 @@ func (a *Account) AddAccount(conn datastore.MySqlDataStore) error {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}
@@ -53,7 +54,6 @@ func (a *Account) AddAccount(conn datastore.MySqlDataStore) error {
 	if cErr != nil {
 		return cErr
 	}
-
 	a.SetID(lastId)
 
 	return nil
@@ -179,13 +179,15 @@ func (a *Account) ListAccounts(conn datastore.MySqlDataStore, page, pageSize int
 
 	return accounts, nil
 }
-func (a *Account) UpdateAccount(conn datastore.MySqlDataStore) error {
+func (a *Account) UpdateAccount(conn datastore.MySqlDataStore, tx *sql.Tx) error {
 	ctx, cancel := conn.NewSqlContext()
 	defer cancel()
 
-	tx, cErr := conn.WriterDB.BeginTx(ctx, nil)
-	if cErr != nil {
-		return cErr
+	if tx == nil {
+		var cErr error
+		if tx, cErr = conn.WriterDB.BeginTx(ctx, nil); cErr != nil {
+			return cErr
+		}
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `
@@ -201,18 +203,16 @@ func (a *Account) UpdateAccount(conn datastore.MySqlDataStore) error {
 		conn.CloseStatement(stmt)
 	}()
 
-	_, err = stmt.ExecContext(ctx,
+	if _, err = stmt.ExecContext(ctx,
 		a.Name,
 		a.ReceivesUpdates,
 		a.ModifiedAt,
 		a.ID,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
-	cErr = tx.Commit()
-	if cErr != nil {
+	if cErr := tx.Commit(); cErr != nil {
 		conn.RollbackAndJoinErrorIfAny(tx)
 		return cErr
 	}

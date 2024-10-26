@@ -11,6 +11,7 @@ import (
 	"github.com/kataras/iris/v12/middleware/accesslog"
 	"mossT8.github.com/device-backend/internal/application/types"
 	"mossT8.github.com/device-backend/internal/domain/customer"
+	"mossT8.github.com/device-backend/internal/domain/device"
 	"mossT8.github.com/device-backend/internal/infrastructure/config/aws"
 	"mossT8.github.com/device-backend/internal/infrastructure/config/local"
 	"mossT8.github.com/device-backend/internal/infrastructure/env"
@@ -29,6 +30,8 @@ var config *types.ConfigModel
 var axxessLogs *accesslog.AccessLog
 
 var customerDomain customer.CustomerDomain
+
+var deviceDomain device.DeviceDomain
 
 var irisServer *iris.Application
 
@@ -92,6 +95,7 @@ func setup() error {
 	}
 
 	customerDomain = customer.NewCustomerDomain(sqlStoreConn)
+	deviceDomain = device.NewDeviceDomain(sqlStoreConn)
 
 	irisServer = iris.New()
 	axxessLogs = middleware.MakeAccessLog()
@@ -100,6 +104,7 @@ func setup() error {
 		middleware.CaselessMatcherMiddleware,
 		middleware.RequestIDMiddleware)
 	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
+	http.NewDeviceController(sqlStoreConn, irisServer, deviceDomain, customerDomain)
 
 	port = env.Getenv(envConstants.Port, envConstants.DefaultPort)
 

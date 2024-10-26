@@ -10,7 +10,7 @@ import (
 	"mossT8.github.com/device-backend/internal/domain/customer/model/entity"
 	"mossT8.github.com/device-backend/internal/infrastructure/persistence/datastore"
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/constants"
-	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/dto/request"
+	"mossT8.github.com/device-backend/internal/domain/customer/model/request"
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/dto/response"
 )
 
