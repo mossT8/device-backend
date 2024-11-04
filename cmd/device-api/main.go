@@ -99,10 +99,17 @@ func setup() error {
 
 	irisServer = iris.New()
 	axxessLogs = middleware.MakeAccessLog()
+
+	middlewareFunction := middleware.NewJWTMiddleware(nil)
+
 	irisServer.Use(
 		axxessLogs.Handler,
 		middleware.CaselessMatcherMiddleware,
-		middleware.RequestIDMiddleware)
+		middleware.RequestIDMiddleware,
+		middlewareFunction([]string{"/login", "/logout", "/refresh", "/health"}),
+	)
+
+	http.NewAuthController(irisServer, customerDomain)
 	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
 	http.NewDeviceController(sqlStoreConn, irisServer, deviceDomain, customerDomain)
 

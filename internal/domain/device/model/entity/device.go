@@ -5,16 +5,16 @@ import (
 )
 
 type Device struct {
-	ID mysqlRecordId
+	ID mysqlRecordId `json:"id"`
 
-	AccountId    mysqlRecordId
-	Name         mysqlText
-	SerialNumber mysqlText
-	ModelId      mysqlRecordId
-	ModelConfig  mysqlJson
+	AccountId    mysqlRecordId `json:"account_id"`
+	Name         mysqlText     `json:"name"`
+	SerialNumber mysqlText     `json:"serial_number"`
+	ModelId      mysqlRecordId `json:"model_id"`
+	ModelConfig  mysqlJson     `json:"model_config"`
 
-	CreatedAt  mysqlDate
-	ModifiedAt mysqlDate
+	CreatedAt  mysqlDate `json:"created_at"`
+	ModifiedAt mysqlDate `json:"modified_at"`
 }
 
 func NewDevice(accountId, modelID int64, name, serialNumber string, config map[string]interface{}) Device {

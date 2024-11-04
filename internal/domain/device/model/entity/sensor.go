@@ -5,16 +5,16 @@ import (
 )
 
 type Sensor struct {
-	ID mysqlRecordId
+	ID mysqlRecordId `json:"id"`
 
-	UnitId         mysqlRecordId
-	Code           mysqlText
-	Name           mysqlText
-	ConfigRequried mysqlJson
-	DefaultConfig  mysqlJson
+	UnitId         mysqlRecordId `json:"unit_id"`
+	Code           mysqlText     `json:"code"`
+	Name           mysqlText     `json:"name"`
+	ConfigRequried mysqlJson     `json:"config_requried"`
+	DefaultConfig  mysqlJson     `json:"default_config"`
 
-	CreatedAt  mysqlDate
-	ModifiedAt mysqlDate
+	CreatedAt  mysqlDate `json:"created_at"`
+	ModifiedAt mysqlDate `json:"modified_at"`
 }
 
 func NewSensor(code, name string) Sensor {

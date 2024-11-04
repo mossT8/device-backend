@@ -3,6 +3,8 @@ package http
 import (
 	"bytes"
 	"cmp"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,6 +20,15 @@ import (
 )
 
 var validate = validator.New()
+
+// Helper function to generate a refresh token
+func generateRefreshToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
 
 func RespondWithJSON(w http.ResponseWriter, payload interface{}, code int, requestId string) {
 	wappedPayload := httpType.DefaultData{

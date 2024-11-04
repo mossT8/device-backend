@@ -3,13 +3,13 @@ package entity
 import "time"
 
 type Models struct {
-	ID mysqlRecordId
+	ID mysqlRecordId `json:"id"`
 
-	Name mysqlText
-	Code mysqlText
+	Name mysqlText `json:"name"`
+	Code mysqlText `json:"code"`
 
-	CreatedAt  mysqlDate
-	ModifiedAt mysqlDate
+	CreatedAt  mysqlDate `json:"created_at"`
+	ModifiedAt mysqlDate `json:"modified_at"`
 }
 
 func NewModels(name, code string) Models {

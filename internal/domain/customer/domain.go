@@ -9,6 +9,7 @@ import (
 type CustomerDomain interface {
 	AddAccount(requestId string, account *entity.Account) error
 	FetchAccount(requestId string, accountId int64) (*entity.Account, error)
+	RetrieveAccount(requestId string, email string) (*entity.Account, error)
 	ListAccounts(requestId string, page, pageSize int64) ([]entity.Account, *int64, error)
 	UpdateAccount(requestId string, account *entity.Account) error
 	DeleteAccount(requestId string, accountId int64) error
@@ -50,6 +51,16 @@ func (u *CustomerDomainImpl) FetchAccount(requestId string, accountId int64) (*e
 	account.SetID(accountId)
 	if aErr := account.GetAccountByID(*u.dbConn); aErr != nil {
 		logger.Errorf(requestId, "unable to get account by ID %d", accountId)
+		return nil, aErr
+	}
+	return account, nil
+}
+
+func (u *CustomerDomainImpl) RetrieveAccount(requestId string, email string) (*entity.Account, error) {
+	account := &entity.Account{}
+	account.SetEmail(email)
+	if aErr := account.GetAccountByID(*u.dbConn); aErr != nil {
+		logger.Errorf(requestId, "unable to get account by Email %s", email)
 		return nil, aErr
 	}
 	return account, nil

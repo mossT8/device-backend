@@ -1,10 +1,10 @@
 package entity
 
 type Units struct {
-	ID mysqlRecordId
+	ID mysqlRecordId `json:"id"`
 
-	Name   mysqlText
-	Symbol mysqlText
+	Name   mysqlText `json:"name"`
+	Symbol mysqlText `json:"symbol"`
 }
 
 func NewUnits(name, symbol string) Units {
