@@ -59,7 +59,7 @@ func (u *CustomerDomainImpl) FetchAccount(requestId string, accountId int64) (*e
 func (u *CustomerDomainImpl) RetrieveAccount(requestId string, email string) (*entity.Account, error) {
 	account := &entity.Account{}
 	account.SetEmail(email)
-	if aErr := account.GetAccountByID(*u.dbConn); aErr != nil {
+	if aErr := account.GetAccountByEmail(*u.dbConn); aErr != nil {
 		logger.Errorf(requestId, "unable to get account by Email %s", email)
 		return nil, aErr
 	}

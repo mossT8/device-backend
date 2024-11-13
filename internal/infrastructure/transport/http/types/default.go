@@ -1,4 +1,4 @@
-package http
+package types
 
 // Default is a struct used in helper functions
 type Default struct {

@@ -67,6 +67,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kataras/iris/v12 v12.2.11
 )

@@ -201,7 +201,6 @@ func Fatal(requestId string, a ...interface{}) {
 func logItNow(level string, requestId string, format *string, a ...interface{}) {
 	var msg string
 	src := src()
-	var redacted = make([]interface{}, len(a))
 	if ValidateAgainstConfiguredLogLevel(level) {
 		// src := src()
 		now := now()
@@ -211,9 +210,9 @@ func logItNow(level string, requestId string, format *string, a ...interface{}) 
 		}
 
 		if format == nil {
-			msg = fmt.Sprint(redacted...)
+			msg = fmt.Sprint(a...)
 		} else {
-			msg = fmt.Sprintf(*format, redacted...)
+			msg = fmt.Sprintf(*format, a...)
 		}
 
 		var finalLogFormat = logFormat

@@ -6,7 +6,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/accesslog"
 	"mossT8.github.com/device-backend/internal/application/types"
@@ -21,6 +23,7 @@ import (
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http"
 	httpConstants "mossT8.github.com/device-backend/internal/infrastructure/transport/http/constants"
 	"mossT8.github.com/device-backend/internal/infrastructure/transport/http/middleware"
+	httpTypes "mossT8.github.com/device-backend/internal/infrastructure/transport/http/types"
 )
 
 var sqlStoreConn *datastore.MySqlDataStore
@@ -100,16 +103,22 @@ func setup() error {
 	irisServer = iris.New()
 	axxessLogs = middleware.MakeAccessLog()
 
-	middlewareFunction := middleware.NewJWTMiddleware(nil)
+	config := httpTypes.JWTConfig{
+		SecretKey:     []byte("super_duper_secret_key"), // Should be loaded from environment variables
+		TokenExpiry:   72 * time.Hour,
+		SigningMethod: jwt.SigningMethodHS256,
+		TokenPrefix:   "Bearer ",
+	}
+	jwtFunction := http.NewJWTMiddleware(config)
 
 	irisServer.Use(
 		axxessLogs.Handler,
 		middleware.CaselessMatcherMiddleware,
 		middleware.RequestIDMiddleware,
-		middlewareFunction([]string{"/login", "/logout", "/refresh", "/health"}),
+		jwtFunction([]string{"/login", "/logout", "/refresh", "/health"}),
 	)
 
-	http.NewAuthController(irisServer, customerDomain)
+	http.NewAuthController(irisServer, customerDomain, &config)
 	http.NewCustomerController(sqlStoreConn, irisServer, customerDomain)
 	http.NewDeviceController(sqlStoreConn, irisServer, deviceDomain, customerDomain)
 
